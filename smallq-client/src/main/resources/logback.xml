@@ -4,7 +4,7 @@
 
     <!-- error file -->
     <appender name="FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>log/server-error.log</file>
+        <file>log/client-error.log</file>
         <!--设置文件超出最大容量后的处理方式为根据时间新建一个文件-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>log/error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
