@@ -28,7 +28,7 @@ public class SmallqClient extends ChannelInboundHandlerAdapter {
 
     public static void main(String[] args) throws InterruptedException {
         SmallqClient smallqClient = new SmallqClient("127.0.0.1", 22333);
-        for (int i=0; i<10; i++) {
+        for (int i=0; i<5; i++) {
             smallqClient.sendMsg("hello"+i);
             Thread.sleep(1000);
         }
@@ -54,14 +54,12 @@ public class SmallqClient extends ChannelInboundHandlerAdapter {
                     });
             ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
             if (channelFuture.isSuccess()) {
-                log.info("连接成功");
+                log.info("连接成功: {}:{}", host, port);
             } else {
-                log.error("连接失败");
+                throw new RuntimeException("连接失败");
             }
-            channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             log.error("连接失败", e);
-        } finally {
             eventLoopGroup.shutdownGracefully();
         }
     }
@@ -74,17 +72,16 @@ public class SmallqClient extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         this.ctx = ctx;
-        ctx.writeAndFlush(Unpooled.copiedBuffer("register", CharsetUtil.UTF_8));
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf byteBuf = (ByteBuf) msg;
-        log.info("收到消息：{}", byteBuf.toString(CharsetUtil.UTF_8));
+        log.debug("接收：{}", byteBuf.toString(CharsetUtil.UTF_8));
     }
 
     public void sendMsg(String msg) {
-        log.debug("推送消息：{}", msg);
+        log.debug("推送：{}", msg);
         ctx.writeAndFlush(Unpooled.copiedBuffer(msg, CharsetUtil.UTF_8));
     }
 }
