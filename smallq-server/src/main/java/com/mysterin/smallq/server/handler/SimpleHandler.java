@@ -16,19 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 public class SimpleHandler extends ChannelInboundHandlerAdapter {
 
     @Override
-    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        log.debug("register");
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        log.debug("active");
-    }
-
-    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf byteBuf = (ByteBuf) msg;
-        log.info("收到：{}", byteBuf.toString(CharsetUtil.UTF_8));
+        log.debug("收到：{}", byteBuf.toString(CharsetUtil.UTF_8));
     }
 
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        log.debug("read complete");
+    }
 }

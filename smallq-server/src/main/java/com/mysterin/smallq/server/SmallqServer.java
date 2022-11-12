@@ -1,6 +1,7 @@
 package com.mysterin.smallq.server;
 
 import com.mysterin.smallq.server.config.SmallqConfig;
+import com.mysterin.smallq.server.handler.EncodeHandler;
 import com.mysterin.smallq.server.handler.SimpleHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -48,7 +49,9 @@ public class SmallqServer {
 
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new SimpleHandler());
+                            ch.pipeline()
+                                    .addLast(new SimpleHandler())
+                                    .addLast(new EncodeHandler());
                         }
                     });
             ChannelFuture channelFuture = serverBootstrap.bind(smallqConfig.getPort()).sync();

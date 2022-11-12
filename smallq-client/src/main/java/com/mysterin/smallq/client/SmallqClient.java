@@ -28,9 +28,8 @@ public class SmallqClient extends ChannelInboundHandlerAdapter {
 
     public static void main(String[] args) throws InterruptedException {
         SmallqClient smallqClient = new SmallqClient("127.0.0.1", 22333);
-        for (int i=0; i<5; i++) {
-            smallqClient.sendMsg("hello"+i);
-            Thread.sleep(1000);
+        for (int i=0; i<50000; i++) {
+            smallqClient.sendMsg("msg" + System.currentTimeMillis() + "-" + i);
         }
     }
 
@@ -62,11 +61,6 @@ public class SmallqClient extends ChannelInboundHandlerAdapter {
             log.error("连接失败", e);
             eventLoopGroup.shutdownGracefully();
         }
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ctx.writeAndFlush(Unpooled.copiedBuffer("active", CharsetUtil.UTF_8));
     }
 
     @Override

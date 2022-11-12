@@ -11,6 +11,7 @@
     <modules>
         <module>smallq-server</module>
         <module>smallq-client</module>
+        <module>smallq-common</module>
     </modules>
 
     <properties>
@@ -43,6 +44,16 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.83</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mysterin</groupId>
+            <artifactId>smallq-common</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
