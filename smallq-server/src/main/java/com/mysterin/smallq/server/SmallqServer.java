@@ -1,8 +1,9 @@
 package com.mysterin.smallq.server;
 
+import com.mysterin.smallq.common.handler.BaseMessageDecodeHandler;
 import com.mysterin.smallq.server.config.SmallqConfig;
-import com.mysterin.smallq.server.handler.EncodeHandler;
-import com.mysterin.smallq.server.handler.SimpleHandler;
+import com.mysterin.smallq.server.handler.BaseMessageHandler;
+import com.mysterin.smallq.common.handler.BaseMessageEncodeHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -11,6 +12,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -50,8 +52,10 @@ public class SmallqServer {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline()
-                                    .addLast(new SimpleHandler())
-                                    .addLast(new EncodeHandler());
+                                    .addLast(new BaseMessageEncodeHandler())
+                                    .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2))
+                                    .addLast(new BaseMessageDecodeHandler())
+                                    .addLast(new BaseMessageHandler());
                         }
                     });
             ChannelFuture channelFuture = serverBootstrap.bind(smallqConfig.getPort()).sync();
@@ -63,4 +67,6 @@ public class SmallqServer {
             workGroup.shutdownGracefully();
         }
     }
+
+
 }

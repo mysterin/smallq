@@ -1,6 +1,7 @@
 package com.mysterin.smallq.common.msg;
 
 import lombok.Data;
+import lombok.ToString;
 
 import java.io.Serializable;
 
@@ -10,6 +11,7 @@ import java.io.Serializable;
  * @date 2022/11/12 22:54
  */
 @Data
+@ToString
 public class BaseMessage implements Serializable {
     private Long id;
     private String topic;

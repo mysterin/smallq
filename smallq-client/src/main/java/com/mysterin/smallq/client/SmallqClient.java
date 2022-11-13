@@ -1,17 +1,20 @@
 package com.mysterin.smallq.client;
 
+import com.alibaba.fastjson.JSON;
+import com.mysterin.smallq.common.handler.AckMessageDecodeHandler;
+import com.mysterin.smallq.common.handler.BaseMessageEncodeHandler;
+import com.mysterin.smallq.common.msg.AckMessage;
+import com.mysterin.smallq.common.msg.BaseMessage;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.CharsetUtil;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author linxiaobin
@@ -24,14 +27,8 @@ public class SmallqClient extends ChannelInboundHandlerAdapter {
     private String host;
     private Integer port;
 
-    private ChannelHandlerContext ctx;
-
-    public static void main(String[] args) throws InterruptedException {
-        SmallqClient smallqClient = new SmallqClient("127.0.0.1", 22333);
-        for (int i=0; i<50000; i++) {
-            smallqClient.sendMsg("msg" + System.currentTimeMillis() + "-" + i);
-        }
-    }
+    private Channel channel;
+    private final Map<Long, AckMessage> result = new ConcurrentHashMap<>();
 
     public SmallqClient(String host, Integer port) {
         this.host = host;
@@ -48,12 +45,17 @@ public class SmallqClient extends ChannelInboundHandlerAdapter {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(SmallqClient.this);
+                            ch.pipeline()
+                                    .addLast(new BaseMessageEncodeHandler())
+                                    .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2))
+                                    .addLast(new AckMessageDecodeHandler())
+                                    .addLast(SmallqClient.this);
                         }
                     });
             ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
             if (channelFuture.isSuccess()) {
                 log.info("连接成功: {}:{}", host, port);
+                channel = channelFuture.channel();
             } else {
                 throw new RuntimeException("连接失败");
             }
@@ -64,18 +66,31 @@ public class SmallqClient extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        this.ctx = ctx;
+    public synchronized void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        AckMessage ackMessage = (AckMessage) msg;
+        result.put(ackMessage.getId(), ackMessage);
+        notifyAll();
     }
 
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf byteBuf = (ByteBuf) msg;
-        log.debug("接收：{}", byteBuf.toString(CharsetUtil.UTF_8));
-    }
-
-    public void sendMsg(String msg) {
-        log.debug("推送：{}", msg);
-        ctx.writeAndFlush(Unpooled.copiedBuffer(msg, CharsetUtil.UTF_8));
+    public synchronized AckMessage send(BaseMessage message) {
+        try {
+            log.debug("推送：{}", JSON.toJSONString(message));
+            channel.writeAndFlush(message);
+            long start = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - start) < 3000) {
+                wait(3000L);
+                Long id = message.getId();
+                AckMessage ackMessage = result.get(id);
+                if (ackMessage != null) {
+                    result.remove(id);
+                    log.debug("返回：{}", JSON.toJSONString(ackMessage));
+                    return ackMessage;
+                }
+            }
+            log.error("没有收到回复, message={}", message);
+        } catch (Exception e) {
+            log.error("发送消息失败， msg={}", message, e);
+        }
+        throw new RuntimeException("发送失败, message=" + message);
     }
 }
