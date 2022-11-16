@@ -2,6 +2,7 @@ package com.mysterin.smallq.common.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.mysterin.smallq.common.msg.BaseMessage;
+import com.mysterin.smallq.common.msg.SmallqMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -19,7 +20,7 @@ public class BaseMessageDecodeHandler extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         byte[] bytes = new byte[in.readableBytes()];
         in.readBytes(bytes);
-        BaseMessage message = JSON.parseObject(bytes, BaseMessage.class);
+        SmallqMessage message = JSON.parseObject(bytes, SmallqMessage.class);
         out.add(message);
     }
 }
