@@ -4,6 +4,7 @@ import com.mysterin.smallq.common.handler.BaseMessageDecodeHandler;
 import com.mysterin.smallq.server.config.SmallqConfig;
 import com.mysterin.smallq.server.handler.BaseMessageHandler;
 import com.mysterin.smallq.common.handler.BaseMessageEncodeHandler;
+import com.mysterin.smallq.server.handler.SmallqMessageHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -55,7 +56,7 @@ public class SmallqServer {
                                     .addLast(new BaseMessageEncodeHandler())
                                     .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2))
                                     .addLast(new BaseMessageDecodeHandler())
-                                    .addLast(new BaseMessageHandler());
+                                    .addLast(new SmallqMessageHandler());
                         }
                     });
             ChannelFuture channelFuture = serverBootstrap.bind(smallqConfig.getPort()).sync();

@@ -72,6 +72,11 @@ public class SmallqClient extends ChannelInboundHandlerAdapter {
         notifyAll();
     }
 
+    /**
+     * 发送消息
+     * @param message
+     * @return
+     */
     public synchronized AckMessage send(BaseMessage message) {
         try {
             log.debug("推送：{}", JSON.toJSONString(message));
