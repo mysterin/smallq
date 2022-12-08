@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class SmallqMessage<T> extends BaseMessage {
-    private Action action;
+    private MsgType msgType;
     private T data;
 }

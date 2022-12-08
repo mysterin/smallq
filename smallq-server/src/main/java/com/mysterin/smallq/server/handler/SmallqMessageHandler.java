@@ -1,7 +1,7 @@
 package com.mysterin.smallq.server.handler;
 
 import com.mysterin.smallq.common.msg.AckMessage;
-import com.mysterin.smallq.common.msg.Action;
+import com.mysterin.smallq.common.msg.MsgType;
 import com.mysterin.smallq.common.msg.SmallqMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
+ * 处理消息
  * @author linxiaobin
  * @Description
  * @date 2022/11/16 10:11
@@ -29,8 +30,8 @@ public class SmallqMessageHandler extends SimpleChannelInboundHandler<SmallqMess
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, SmallqMessage msg) throws Exception {
         log.debug("接收：{}", msg);
-        Action action = msg.getAction();
-        switch (action) {
+        MsgType msgType = msg.getMsgType();
+        switch (msgType) {
             case PUT:
                 handlePut(ctx, msg);
                 break;
@@ -64,6 +65,9 @@ public class SmallqMessageHandler extends SimpleChannelInboundHandler<SmallqMess
      */
     private void handleGet(ChannelHandlerContext ctx, SmallqMessage msg) {
         SmallqMessage smallqMessage = pollMessage(msg);
+        if (smallqMessage == null) {
+
+        }
         ctx.channel().writeAndFlush(smallqMessage);
     }
 

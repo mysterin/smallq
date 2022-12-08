@@ -2,7 +2,6 @@ package com.mysterin.smallq.common.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.mysterin.smallq.common.msg.AckMessage;
-import com.mysterin.smallq.common.msg.BaseMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;

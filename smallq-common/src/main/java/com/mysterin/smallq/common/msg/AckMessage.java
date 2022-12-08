@@ -10,6 +10,6 @@ import lombok.ToString;
  */
 @Data
 @ToString
-public class AckMessage extends BaseMessage {
+public class AckMessage extends SmallqMessage {
     private boolean success;
 }
